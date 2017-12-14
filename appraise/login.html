@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>某某医院登录页面</title>
+
+    <!-- Bootstrap -->
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #wrap{
+            margin-top: 10%;
+        }
+        #wrap h2{
+            margin-bottom: 3%;
+        }
+        #wrap form img{
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #userWarning,#passwordWarning,#verifyWarning {
+            display: none;
+        }
+        #imgChange {
+            position: absolute;
+            left: 100px;
+            bottom: 0;
+            height: 28px;
+            line-height: 28px;
+            cursor: pointer;
+        }
+        #verifyImgDiv {
+            position: relative;
+        }
+        @media (max-width: 991px) {
+            h2 {
+                font-size: 24px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div class="container-fluid" id="wrap">
+    <div class="row">
+        <h2 class="text-center">某某医院考核系统</h2>
+        <div class="hidden-xs col-sm-3 col-sm-offset-3">
+            <img src="./images/logo.jpg" alt="logo" class="img-responsive">
+        </div>
+        <div class="col-sm-3">
+            <form>
+                <div class="form-group">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                    <label for="username">用户名</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="请输入工号">
+                </div>
+                <div class="form-group" id="userWarning">
+
+                </div>
+                <div class="form-group">
+                    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                    <label for="password">密码</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码">
+                </div>
+                <div class="form-group" id="passwordWarning">
+
+                </div>
+                <div class="form-group" id="verifyImgDiv">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    <label for="verify">验证码</label>
+                    <input type="text" class="form-control" id="verify" name="verify" placeholder="请输入验证码">
+                    <a id="imgChange">看不清，换一张</a>
+                    <img id="verifyImg" src="./admin/getVerify.php" alt="验证码">
+                </div>
+                <div class="form-group" id="verifyWarning">
+
+                </div>
+                <button type="button" class="btn btn-default" id="login">登录</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script
+        src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script>
+    (function(){
+        $("body").keydown(function(event){
+            if (event.keyCode == "13") {
+                $("#login").click();
+            }
+        });
+        $("#imgChange").click(function(){
+            $("#verifyImg").attr("src","./admin/getVerify.php?" + Math.random());
+        });
+        $("#login").click(function(){
+            $("#username,#password,#verify").parent().removeClass("has-error");
+            $("#userWarning,#passwordWarning,#verifyWarning").css({"display":"none"});
+            var username = $.trim($("#username").val());
+            if (username.length == 0) {
+                $("#username").parent().addClass("has-error");
+                $("#userWarning").text("用户名不能为空！").css({"color":"red","display":"block"});
+                return false;
+            }
+            var password = $.trim($("#password").val());
+            if (password.length == 0) {
+                $("#password").parent().addClass("has-error");
+                $("#passwordWarning").text("密码不能为空！").css({"color":"red","display":"block"});
+                return false;
+            }
+            var verify = $.trim($("#verify").val());
+            if (verify.length == 0) {
+                $("#verify").parent().addClass("has-error");
+                $("#verifyWarning").text("验证码不能为空！").css({"color":"red","display":"block"});
+                return false;
+            }
+            $.ajax({
+                type:"POST",
+                url:"./admin/doLogin.php",
+                dataType:"JSON",
+                data:{"username":username,"password":password,"verify":verify},
+                success:function(data){
+                    console.log(data);
+                    switch(data){
+                        case 1: //管理员
+                            window.location.href = "admin.php";
+                            break;
+                        case 2: //领导
+                            window.location.href = "leader.php";
+                            break;
+                        case 3: //普通用户
+                            window.location.href = "normal.php";
+                            break;
+                        case 4:
+                            $("#username,#password").parent().addClass("has-error");
+                            $("#passwordWarning").text("用户名或密码错误").css({"color":"red","display":"block"});
+                            break;
+                        case 5:
+                            $("#verify").parent().addClass("has-error");
+                            $("#verifyWarning").text("验证码错误").css({"color":"red","display":"block"});
+                            $("#verifyImg").attr("src","./admin/getVerify.php?" + Math.random());
+                            break;
+                        default:
+                            alert("something wrong!");
+                    }
+                },
+                error:function(XMLHttpRequest,textStatus,errorThrown){
+                    console.log(XMLHttpRequest);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+
+                }
+            });
+        });
+    })();
+
+
+
+</script>
+</body>
+</html>
